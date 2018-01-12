@@ -1,15 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Image, ImageBackground, ActivityIndicator, View } from 'react-native';
+import {ActivityIndicator, Image, ImageBackground, View} from 'react-native';
+
+import SVGRender from './SVGRender';
 
 class ImageLoad extends React.Component {
   static propTypes = {
     isShowActivity: PropTypes.bool,
+    placeholderSVGContent: PropTypes.string
   };
 
   static defaultProps = {
     isShowActivity: true,
-	};
+    placeholderSVGContent: null
+  };
 
   constructor(props) {
     super(props);
@@ -19,13 +23,13 @@ class ImageLoad extends React.Component {
     };
   }
 
-  onLoadEnd(){
+  onLoadEnd() {
     this.setState({
       isLoaded: true
     });
   }
 
-  onError(){
+  onError() {
     this.setState({
       isError: true
     });
@@ -35,9 +39,9 @@ class ImageLoad extends React.Component {
     const {
       style, source, resizeMode, borderRadius, backgroundColor, children,
       loadingStyle, placeholderSource, placeholderStyle,
-      customImagePlaceholderDefaultStyle
+      customImagePlaceholderDefaultStyle, placeholderSVGContent
     } = this.props;
-    return(
+    return (
       <ImageBackground
         onLoadEnd={this.onLoadEnd.bind(this)}
         onError={this.onError.bind(this)}
@@ -48,30 +52,43 @@ class ImageLoad extends React.Component {
       >
         {
           (this.state.isLoaded && !this.state.isError) ? children :
-          <View 
-            style={[styles.viewImageStyles, { borderRadius: borderRadius }, backgroundColor ? { backgroundColor: backgroundColor } : {}]}
-          >
-            {
-              (this.props.isShowActivity && !this.state.isError) &&
-              <ActivityIndicator
-                style={styles.activityIndicator}
-                size={loadingStyle ? loadingStyle.size : 'small'}
-                color={loadingStyle ? loadingStyle.color : 'gray'}
-              />
-            }
-            <Image
-              style={placeholderStyle ? placeholderStyle : [styles.imagePlaceholderStyles, customImagePlaceholderDefaultStyle]}
-              source={placeholderSource ? placeholderSource : require('./Images/empty-image.png')}
+            <View
+              style={[styles.viewImageStyles, {borderRadius: borderRadius}, backgroundColor ? {backgroundColor: backgroundColor} : {}]}
             >
-            </Image>
-          </View>
+              {
+                (this.props.isShowActivity && !this.state.isError) &&
+                <ActivityIndicator
+                  style={styles.activityIndicator}
+                  size={loadingStyle ? loadingStyle.size : 'small'}
+                  color={loadingStyle ? loadingStyle.color : 'gray'}
+                />
+              }
+              {
+                placeholderSVGContent
+                  ? (
+                    <View
+                      style={{width: '100%', height: '100%'}}
+                    >
+                      <SVGRender
+                        svgContent={placeholderSVGContent}
+                      />
+                    </View>
+                  )
+                  : (
+                    <Image
+                      style={placeholderStyle ? placeholderStyle : [styles.imagePlaceholderStyles, customImagePlaceholderDefaultStyle]}
+                      source={placeholderSource ? placeholderSource : require('./Images/empty-image.png')}
+                    />
+                  )
+              }
+            </View>
         }
         {
           this.props.children &&
           <View style={styles.viewChildrenStyles}>
-          {
-            this.props.children
-          }
+            {
+              this.props.children
+            }
           </View>
         }
       </ImageBackground>
@@ -99,7 +116,7 @@ const styles = {
     height: 100,
     resizeMode: 'contain',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   viewChildrenStyles: {
     top: 0,
@@ -109,6 +126,6 @@ const styles = {
     position: 'absolute',
     backgroundColor: 'transparent'
   }
-}
+};
 
 export default ImageLoad;
